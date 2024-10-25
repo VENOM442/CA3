@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>EZee QR</title>
+   <style>
+      * {
+         margin: 0;
+         padding: 0;
+         font-family: 'Poppins', sans-serif;
+         box-sizing: border-box;
+      }
+
+      body {
+         background: #262a2f;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         min-height: 100vh;
+         margin: 0;
+         flex-direction: column;
+         position: relative;
+      }
+
+      video {
+         position: fixed;
+         top: 0;
+         left: 0;
+         min-width: 100%;
+         min-height: 100%;
+         z-index: -1;
+         object-fit: cover;
+      }
+
+      /* Top navigation bar */
+      .nav {
+         width: 100%;
+         background-color: #2f3136;
+         display: flex;
+         justify-content: space-between;
+         padding: 15px;
+         position: absolute;
+         top: 0;
+         left: 0;
+         z-index: 1;
+      }
+
+      .nav a {
+         color: white;
+         text-decoration: none;
+         padding: 10px 20px;
+         font-size: 16px;
+      }
+
+      .nav a:hover {
+         background-color: #494eea;
+         border-radius: 5px;
+      }
+
+      /* Main container */
+      .container {
+         display: flex;
+         justify-content: space-between;
+         width: 100%;
+         max-width: 700px;
+         padding: 25px 35px;
+         background: #2c2f35;
+         border-radius: 10px;
+         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+         text-align: center;
+         margin-top: 100px; /* Adjust for navigation bar */
+      }
+
+      /* Left section - Buttons and input */
+      .left-section {
+         display: flex;
+         flex-direction: column;
+         justify-content: space-between;
+         height: 100%;
+         margin-right: 20px;
+      }
+
+      .button-group {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         grid-gap: 10px;
+      }
+
+      .button-group button {
+         padding: 10px 20px;
+         width: 150px;
+         border: none;
+         background-color: #42464d;
+         color: white;
+         border-radius: 30px;
+         cursor: pointer;
+         font-size: 16px;
+         transition: background-color 0.3s, transform 0.3s;
+      }
+
+      .button-group button:hover {
+         background-color: #494eea;
+      }
+
+      .button-group button:active {
+         transform: scale(0.95);
+      }
+
+      /* Input field wrapper styling */
+      .input-wrapper {
+         display: none;
+         position: relative;
+         margin-top: 15px;
+         width: 95%;
+      }
+
+      /* Input field styling */
+      #inputField {
+         padding: 10px;
+         border: 1px solid #ccc;
+         border-radius: 20px;
+         width: 100%;
+         font-size: 16px;
+         background-color: #393c42;
+         color: white;
+      }
+
+      /* Cross (clear) button inside input field */
+      .clear-icon {
+         position: absolute;
+         right: 10px;
+         top: 50%;
+         transform: translateY(-50%);
+         cursor: pointer;
+         font-size: 18px;
+         color: #aaa;
+      }
+
+      .clear-icon:hover {
+         color: white;
+      }
+
+      /* Create QR Button */
+      .create-button {
+         width: 320px;
+         height: 50px;
+         background: #494eea;
+         color: #fff;
+         border: 0;
+         outline: 0;
+         border-radius: 30px;
+         box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+         cursor: pointer;
+         font-weight: 500;
+         margin-top: 20px;
+         transition: background-color 0.3s;
+      }
+
+      .create-button:hover {
+         background-color: #3035e0;
+      }
+
+      /* Right section - QR Image and Download button */
+      .right-section {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+      }
+
+      #imgBox {
+         width: 150px;
+         height: 150px;
+         border: 2px dashed white;
+         border-radius: 10px;
+         margin-bottom: 20px;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         position: relative;
+      }
+
+      /* Blurred QR placeholder */
+      #blurredQR {
+         width: 100%;
+         height: 100%;
+         opacity: 0.5;
+         filter: blur(5px);
+         transition: opacity 0.5s ease;
+      }
+
+      /* QR Image */
+      #qrImage {
+         width: 100%;
+         height: 100%;
+         position: absolute;
+         top: 0;
+         left: 0;
+         opacity: 0;
+         transition: opacity 0.5s ease;
+      }
+
+      #downloadButton {
+         width: 320px;
+         height: 50px;
+         background: #494eea;
+         color: #fff;
+         border: 0;
+         outline: 0;
+         border-radius: 30px;
+         box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+         cursor: pointer;
+         font-weight: 500;
+         margin-top: 10px;
+         transition: background-color 0.3s;
+      }
+
+      #downloadButton:hover {
+         background-color: #3035e0;
+      }
+
+      /* Flowchart Styling */
+      .flowchart {
+         background-color: #2c2f35;
+         padding: 20px;
+         border-radius: 10px;
+         margin-top: 50px;
+         color: white;
+         text-align: center;
+      }
+
+      .flowchart h2 {
+         margin-bottom: 20px;
+      }
+
+      .flowchart div {
+         margin: 15px 0;
+      }
+
+      /* Responsive styling */
+      @media screen and (max-width: 768px) {
+         .container {
+            flex-direction: column;
+            align-items: center;
+         }
+
+         .button-group, .create-button, #imgBox, #downloadButton {
+            width: 100%;
+            max-width: 320px;
+         }
+      }
+   </style>
+</head>
+<body>
+
+   <!-- Navigation Bar -->
+   <div class="nav">
+      <a href="about.html">About Us</a>
+      <a href="support.html">Support</a>
+      <a href="contact.html">Contact Us</a>
+   </div>
+
+   <!-- Main QR Generator Container -->
+   <div class="container">
+      <!-- Left section for input options and Create QR button -->
+      <div class="left-section">
+         <div class="button-group">
+            <button onclick="showInput('text')">Text</button>
+            <button onclick="showInput('url')">URL</button>
+            <button onclick="showInput('whatsapp')">WhatsApp</button>
+            <button onclick="showInput('email')">Email</button>
+         </div>
+         <!-- Dynamic input field -->
+         <div class="input-wrapper">
+            <input type="text" id="inputField" placeholder="Enter data here...">
+            <span class="clear-icon" onclick="clearInput()">&#10005;</span>
+         </div>
+         <button class="create-button" onclick="generateQR()">Create QR</button>
+      </div>
+
+      <!-- Right section for QR image and Download button -->
+      <div class="right-section">
+         <div id="imgBox">
+            <!-- Blurred placeholder image -->
+            <img id="blurredQR" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Placeholder">
+            <!-- Actual QR code image -->
+            <img id="qrImage" src="">
+         </div>
+
+         <button id="downloadButton" onclick="downloadQR()">Download QR</button>
+      </div>
+   </div>
+
+   <video id="vid" muted autoplay loop>
+      <source src="76.mp4">
+   </video>
+
+   <!-- Flowchart Section -->
+   <div class="flowchart">
+      <h2>Create QR with Us</h2>
+      <div>Step 1: Select Type of QR</div>
+      <div>Step 2: Input Requirement and click Generate QR</div>
+   </div>
+
+   <script>
+      let inputField = document.getElementById("inputField");
+      let inputWrapper = document.querySelector(".input-wrapper");
+      let qrImage = document.getElementById("qrImage");
+      let blurredQR = document.getElementById("blurredQR");
+
+      // Function to show input field based on button click
+      function showInput(type) {
+         let placeholderText = '';
+         switch (type) {
+            case 'text':
+               placeholderText = 'Enter text to generate QR code...';
+               break;
+            case 'url':
+               placeholderText = 'Enter URL...';
+               break;
+            case 'whatsapp':
+               placeholderText = 'Enter WhatsApp number...';
+               break;
+            case 'email':
+               placeholderText = 'Enter Email address...';
+               break;
+         }
+         inputField.placeholder = placeholderText;
+         inputWrapper.style.display = 'block';
+      }
+
+      // Clear input field function
+      function clearInput() {
+         inputField.value = '';
+         qrImage.src = '';  // Clear any existing QR code
+         qrImage.style.opacity = 0;  // Hide QR code
+         blurredQR.style.opacity = 0.5;  // Show blurred placeholder
+      }
+
+      // Function to generate the QR code
+      function generateQR() {
+         const inputValue = inputField.value;
+         if (inputValue === '') {
+            alert('Please enter data to generate QR code.');
+            return;
+         }
+         const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(inputValue)}`;
+         qrImage.src = qrCodeURL;
+
+         // Add animation for displaying the real QR code
+         qrImage.onload = function () {
+            blurredQR.style.opacity = 0;  // Hide the blurred placeholder
+            qrImage.style.opacity = 1;  // Show the actual QR code
+         }
+      }
+
+      // Function to download the QR code
+      function downloadQR() {
+         const link = document.createElement('a');
+         link.href = qrImage.src;
+         link.download = 'qr-code.png';
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+      }
+   </script>
+</body>
+</html>
